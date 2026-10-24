@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>國中數學：平行四邊形對角線性質探究</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        canvas {
+            touch-action: none; /* 防止手機拖曳時觸發網頁滾動 */
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen pb-10 flex flex-col justify-between">
+
+    <!-- Header / Navbar -->
+    <header class="bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg py-4 px-4 sm:px-8">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <div class="bg-white/20 p-2.5 rounded-xl backdrop-blur-md">
+                    <i class="fa-solid fa-shapes text-2xl text-amber-100"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight">平行四邊形對角線性質探究</h1>
+                    <p class="text-xs sm:text-sm text-amber-100">兩對角線互相平分 ｜ 幾何動態實驗室</p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button id="resetBtn" class="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white font-semibold py-2 px-4 rounded-xl transition duration-200 text-sm border border-white/30 backdrop-blur-md active:scale-95">
+                    <i class="fa-solid fa-rotate-left"></i> 重置圖形
+                </button>
+                <button id="animateBtn" class="flex items-center gap-2 bg-amber-900/30 hover:bg-amber-900/40 text-amber-100 font-semibold py-2 px-4 rounded-xl transition duration-200 text-sm border border-amber-300/30 backdrop-blur-md active:scale-95">
+                    <i class="fa-solid fa-play" id="animIcon"></i> <span id="animText">自動展示</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 w-full flex-grow mt-6 flex flex-col gap-5">
+
+        <!-- Real-time Data Dashboard -->
+        <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-base font-bold text-slate-700 flex items-center gap-2">
+                    <i class="fa-solid fa-gauge-high text-orange-500"></i> 對角線段長度即時數據
+                </h2>
+                <span class="text-xs px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full font-medium">即時連動中</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-3">
+                <!-- Diagonal 1: AC Segment -->
+                <div class="bg-rose-50/80 border border-rose-200 rounded-xl p-3 sm:p-4 flex flex-col gap-1">
+                    <span class="text-xs sm:text-sm font-bold text-rose-600 flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span> 對角線 1 (AC)
+                    </span>
+                    <div class="flex justify-around items-baseline mt-2">
+                        <div class="text-center">
+                            <span class="text-xs text-rose-500 font-semibold">AO</span>
+                            <div id="valAO" class="text-2xl sm:text-3xl font-extrabold text-rose-700 font-mono">0.0</div>
+                        </div>
+                        <span class="text-rose-300 text-xl font-bold">=</span>
+                        <div class="text-center">
+                            <span class="text-xs text-rose-500 font-semibold">OC</span>
+                            <div id="valOC" class="text-2xl sm:text-3xl font-extrabold text-rose-700 font-mono">0.0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Diagonal 2: BD Segment -->
+                <div class="bg-indigo-50/80 border border-indigo-200 rounded-xl p-3 sm:p-4 flex flex-col gap-1">
+                    <span class="text-xs sm:text-sm font-bold text-indigo-600 flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded-full bg-indigo-500 inline-block"></span> 對角線 2 (BD)
+                    </span>
+                    <div class="flex justify-around items-baseline mt-2">
+                        <div class="text-center">
+                            <span class="text-xs text-indigo-500 font-semibold">BO</span>
+                            <div id="valBO" class="text-2xl sm:text-3xl font-extrabold text-indigo-700 font-mono">0.0</div>
+                        </div>
+                        <span class="text-indigo-300 text-xl font-bold">=</span>
+                        <div class="text-center">
+                            <span class="text-xs text-indigo-500 font-semibold">OD</span>
+                            <div id="valOD" class="text-2xl sm:text-3xl font-extrabold text-indigo-700 font-mono">0.0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        <!-- Canvas Container Card -->
+        <div class="glass-card rounded-2xl p-4 shadow-sm border border-slate-200/80 relative flex flex-col items-center">
+            <div class="w-full flex justify-between items-center mb-2 px-1">
+                <span class="text-xs text-slate-500 flex items-center gap-1">
+                    <i class="fa-solid fa-hand-pointer text-amber-500"></i> 請用單指或滑鼠拖曳頂點 <strong class="text-slate-700">A, B, C</strong>
+                </span>
+                <span class="text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                    交點 O 自動計算 (不可拖曳)
+                </span>
+            </div>
+
+            <!-- Canvas -->
+            <div class="w-full aspect-[4/3] sm:aspect-[16/9] relative rounded-xl overflow-hidden border border-slate-200 bg-white shadow-inner">
+                <canvas id="geoCanvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-8 text-center text-xs text-slate-400 py-3">
+        國中數學互動教學媒體 ｜ 針對手機 Touch 與桌面 Mouse 優化設計
+    </footer>
+
+    <!-- Interactive Geometry Logic -->
+    <script>
+        const canvas = document.getElementById('geoCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 頂點定義 (A, B, C 可拖曳，D 自動計算維持平行四邊形，O 為兩對角線交點)
+        let A = { x: 140, y: 80, name: 'A', draggable: true };
+        let B = { x: 80, y: 260, name: 'B', draggable: true };
+        let C = { x: 320, y: 260, name: 'C', draggable: true };
+        let D = { x: 380, y: 80, name: 'D', draggable: false }; // D = C + A - B
+        let O = { x: 0, y: 0, name: 'O', draggable: false };    // 交點
+
+        let draggingPoint = null;
+        let isAnimating = false;
+        let animFrameId = null;
+        let animAngle = 0;
+
+        // 手機與行動端加大觸控半徑
+        const handleRadius = window.innerWidth < 640 ? 16 : 14;
+
+        // 自適應 Canvas 解析度調整
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            const rect = container.getBoundingClientRect();
+            
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            draw();
+        }
+
+        // 計算兩點距離
+        function getDistance(p1, p2) {
+            return Math.hypot(p1.x - p2.x, p1.y - p2.y);
+        }
+
+        // 計算 AC 與 BD 的交點 O
+        function calculateIntersection(p1, p2, p3, p4) {
+            const det = (p2.x - p1.x) * (p4.y - p3.y) - (p2.y - p1.y) * (p4.x - p3.x);
+            if (det === 0) return { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+            const lambda = ((p4.y - p3.y) * (p4.x - p1.x) + (p3.x - p4.x) * (p4.y - p1.y)) / det;
+            return {
+                x: p1.x + lambda * (p2.x - p1.x),
+                y: p1.y + lambda * (p2.y - p1.y)
+            };
+        }
+
+        // 更新座標與數據
+        function updateGeometry() {
+            // D 點連動維持平行四邊形 (D = C + A - B)
+            D.x = C.x + A.x - B.x;
+            D.y = C.y + A.y - B.y;
+
+            // 交點 O
+            const inter = calculateIntersection(A, C, B, D);
+            O.x = inter.x;
+            O.y = inter.y;
+
+            // 數據換算與顯示 (除以固定比例縮放，保留一位小數)
+            const scale = 20; 
+            const ao = (getDistance(A, O) / scale).toFixed(1);
+            const oc = (getDistance(O, C) / scale).toFixed(1);
+            const bo = (getDistance(B, O) / scale).toFixed(1);
+            const od = (getDistance(O, D) / scale).toFixed(1);
+
+            document.getElementById('valAO').innerText = ao;
+            document.getElementById('valOC').innerText = oc;
+            document.getElementById('valBO').innerText = bo;
+            document.getElementById('valOD').innerText = od;
+        }
+
+        // Canvas 繪圖
+        function draw() {
+            const container = canvas.parentElement;
+            const w = container.getBoundingClientRect().width;
+            const h = container.getBoundingClientRect().height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            updateGeometry();
+
+            // 1. 平行四邊形填色
+            ctx.beginPath();
+            ctx.moveTo(A.x, A.y);
+            ctx.lineTo(B.x, B.y);
+            ctx.lineTo(C.x, C.y);
+            ctx.lineTo(D.x, D.y);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(249, 115, 22, 0.08)';
+            ctx.fill();
+
+            // 2. 外框線
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#f97316';
+            ctx.stroke();
+
+            // 3. 對角線 AC (紅色/粉色系)
+            ctx.beginPath();
+            ctx.moveTo(A.x, A.y);
+            ctx.lineTo(C.x, C.y);
+            ctx.strokeStyle = '#f43f5e';
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([6, 4]);
+            ctx.stroke();
+
+            // 4. 對角線 BD (藍色/靛色系)
+            ctx.beginPath();
+            ctx.moveTo(B.x, B.y);
+            ctx.lineTo(D.x, D.y);
+            ctx.strokeStyle = '#6366f1';
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([6, 4]);
+            ctx.stroke();
+
+            ctx.setLineDash([]); // 重設虛線
+
+            // 5. 對角線交點 O
+            ctx.beginPath();
+            ctx.arc(O.x, O.y, 6, 0, Math.PI * 2);
+            ctx.fillStyle = '#10b981';
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#ffffff';
+            ctx.stroke();
+
+            ctx.font = 'bold 15px "Noto Sans TC", sans-serif';
+            ctx.fillStyle = '#047857';
+            ctx.fillText('O (交點)', O.x + 10, O.y + 20);
+
+            // 6. 頂點標籤與拖曳圓圈 (A, B, C, D)
+            const points = [A, B, C, D];
+            points.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, handleRadius, 0, Math.PI * 2);
+                
+                if (p.draggable) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.strokeStyle = '#ea580c';
+                    ctx.lineWidth = 3;
+                } else {
+                    ctx.fillStyle = '#f1f5f9';
+                    ctx.strokeStyle = '#94a3b8';
+                    ctx.lineWidth = 2;
+                }
+                
+                ctx.fill();
+                ctx.stroke();
+
+                if (p.draggable) {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ea580c';
+                    ctx.fill();
+                }
+
+                ctx.font = 'bold 16px "Noto Sans TC", sans-serif';
+                ctx.fillStyle = '#1e293b';
+                let offsetX = p.x < w / 2 ? -24 : 14;
+                let offsetY = p.y < h / 2 ? -12 : 22;
+                ctx.fillText(p.name, p.x + offsetX, p.y + offsetY);
+            });
+        }
+
+        // 觸控與滑鼠位置檢測
+        function getCanvasPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function onPointerDown(e) {
+            const pos = getCanvasPos(e);
+            const draggables = [A, B, C];
+
+            for (let p of draggables) {
+                if (getDistance(pos, p) <= handleRadius + 12) { // 防呆容錯區域
+                    draggingPoint = p;
+                    if (isAnimating) stopAnimation();
+                    break;
+                }
+            }
+        }
+
+        function onPointerMove(e) {
+            if (!draggingPoint) return;
+            const pos = getCanvasPos(e);
+
+            // 防呆機制：避免頂點拉出畫布邊界
+            const container = canvas.parentElement;
+            const w = container.getBoundingClientRect().width;
+            const h = container.getBoundingClientRect().height;
+            const margin = 20;
+
+            draggingPoint.x = Math.max(margin, Math.min(w - margin, pos.x));
+            draggingPoint.y = Math.max(margin, Math.min(h - margin, pos.y));
+
+            draw();
+        }
+
+        function onPointerUp() {
+            draggingPoint = null;
+        }
+
+        // 綁定事件
+        canvas.addEventListener('mousedown', onPointerDown);
+        canvas.addEventListener('mousemove', onPointerMove);
+        window.addEventListener('mouseup', onPointerUp);
+
+        canvas.addEventListener('touchstart', (e) => { onPointerDown(e); e.preventDefault(); }, { passive: false });
+        canvas.addEventListener('touchmove', (e) => { onPointerMove(e); e.preventDefault(); }, { passive: false });
+        window.addEventListener('touchend', onPointerUp);
+
+        // 重置圖形
+        function resetGraph() {
+            if (isAnimating) stopAnimation();
+            const container = canvas.parentElement;
+            const w = container.getBoundingClientRect().width;
+            const h = container.getBoundingClientRect().height;
+
+            A.x = w * 0.32; A.y = h * 0.25;
+            B.x = w * 0.20; B.y = h * 0.75;
+            C.x = w * 0.68; C.y = h * 0.75;
+
+            draw();
+        }
+
+        // 自動動畫展示
+        function animateLoop() {
+            animAngle += 0.025;
+            A.x += Math.cos(animAngle) * 0.8;
+            A.y += Math.sin(animAngle * 0.5) * 0.5;
+            C.x += Math.sin(animAngle) * 0.6;
+
+            draw();
+            animFrameId = requestAnimationFrame(animateLoop);
+        }
+
+        function toggleAnimation() {
+            if (isAnimating) {
+                stopAnimation();
+            } else {
+                startAnimation();
+            }
+        }
+
+        function startAnimation() {
+            isAnimating = true;
+            document.getElementById('animText').innerText = '停止展示';
+            document.getElementById('animIcon').className = 'fa-solid fa-pause';
+            animateLoop();
+        }
+
+        function stopAnimation() {
+            isAnimating = false;
+            document.getElementById('animText').innerText = '自動展示';
+            document.getElementById('animIcon').className = 'fa-solid fa-play';
+            if (animFrameId) cancelAnimationFrame(animFrameId);
+        }
+
+        // 初始化
+        document.getElementById('resetBtn').addEventListener('click', resetGraph);
+        document.getElementById('animateBtn').addEventListener('click', toggleAnimation);
+        window.addEventListener('resize', resizeCanvas);
+
+        window.onload = function() {
+            resizeCanvas();
+            resetGraph();
+        };
+    </script>
+</body>
+</html>
