@@ -20,12 +20,16 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(226, 232, 240, 0.8);
         }
+        .quiz-option { min-height: 44px; line-height: 1.45; }
+        .quiz-option:disabled { cursor: default; }
+        button:focus-visible { outline: 3px solid #fdba74; outline-offset: 2px; }
         canvas {
             touch-action: none; /* 防止手機拖曳時觸發網頁滾動 */
         }
     </style>
 </head>
 <body class="text-slate-800 min-h-screen pb-10 flex flex-col justify-between">
+
 
     <!-- Header / Navbar -->
     <header class="bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg py-4 px-4 sm:px-8">
@@ -50,8 +54,10 @@
         </div>
     </header>
 
+
     <!-- Main Content Container -->
     <main class="max-w-4xl mx-auto px-4 sm:px-6 w-full flex-grow mt-6 flex flex-col gap-5">
+
 
         <!-- Real-time Data Dashboard -->
         <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80">
@@ -61,6 +67,7 @@
                 </h2>
                 <span class="text-xs px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full font-medium">即時連動中</span>
             </div>
+
 
             <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-3">
                 <!-- Diagonal 1: AC Segment -->
@@ -81,6 +88,7 @@
                     </div>
                 </div>
 
+
                 <!-- Diagonal 2: BD Segment -->
                 <div class="bg-indigo-50/80 border border-indigo-200 rounded-xl p-3 sm:p-4 flex flex-col gap-1">
                     <span class="text-xs sm:text-sm font-bold text-indigo-600 flex items-center gap-1.5">
@@ -100,6 +108,35 @@
                 </div>
             </div>
 
+
+
+        <!-- Guided self-study quiz -->
+        <section id="quizCard" class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm border border-amber-200">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <h2 class="font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-list-check text-orange-500"></i>闖關探索：對角線互相平分</h2>
+                <span id="quizProgress" class="text-xs font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-800">第 1 / 4 關</span>
+            </div>
+            <div class="h-2 rounded-full bg-slate-100 overflow-hidden mb-4"><div id="quizBar" class="h-full bg-orange-500 transition-all" style="width:25%"></div></div>
+            <p class="text-sm text-slate-600 mb-3">先拖曳圖形中的 A、B、C，觀察 O 和四段線段長度，再回答問題。答對後才能進入下一關。</p>
+            <div id="quizQuestion" class="font-bold text-base sm:text-lg mb-3">第 1 關：O 點是由什麼決定的位置？</div>
+            <div id="quizOptions" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <button class="quiz-option" data-value="A">A. 兩條對角線的交點</button>
+                <button class="quiz-option" data-value="B">B. 平行四邊形的一個頂點</button>
+                <button class="quiz-option" data-value="C">C. 任意選取的點</button>
+                <button class="quiz-option" data-value="D">D. 平行四邊形其中一邊的中點</button>
+            </div>
+            <p id="quizFeedback" class="text-sm mt-3 min-h-6" aria-live="polite">提示：觀察紅色 AC 和藍色 BD 相交的位置。</p>
+            <div class="flex flex-wrap gap-2 mt-3">
+                <button id="nextQuizBtn" disabled class="rounded-xl px-4 py-2 font-bold text-sm bg-slate-200 text-slate-400 cursor-not-allowed">答對後前往下一關 <i class="fa-solid fa-arrow-right ml-1"></i></button>
+                <button id="retryQuizBtn" class="rounded-xl px-4 py-2 font-semibold text-sm border border-slate-200 text-slate-600 hover:bg-slate-50">重新回答本關</button>
+            </div>
+            <div id="quizSummary" class="hidden mt-4 rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-emerald-900">
+                <p class="font-bold mb-1"><i class="fa-solid fa-circle-check mr-1"></i>探索完成！</p>
+                <p class="text-sm">O 是對角線 AC 與 BD 的交點，而且 AO = OC、BO = OD。因此，O 分別是 AC 和 BD 的中點；也就是說，<strong>平行四邊形的兩條對角線互相平分</strong>。</p>
+            </div>
+        </section>
+
+
         <!-- Canvas Container Card -->
         <div class="glass-card rounded-2xl p-4 shadow-sm border border-slate-200/80 relative flex flex-col items-center">
             <div class="w-full flex justify-between items-center mb-2 px-1">
@@ -111,23 +148,28 @@
                 </span>
             </div>
 
+
             <!-- Canvas -->
             <div class="w-full aspect-[4/3] sm:aspect-[16/9] relative rounded-xl overflow-hidden border border-slate-200 bg-white shadow-inner">
                 <canvas id="geoCanvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
             </div>
         </div>
 
+
     </main>
+
 
     <!-- Footer -->
     <footer class="mt-8 text-center text-xs text-slate-400 py-3">
         國中數學互動教學媒體 ｜ 針對手機 Touch 與桌面 Mouse 優化設計
     </footer>
 
+
     <!-- Interactive Geometry Logic -->
     <script>
         const canvas = document.getElementById('geoCanvas');
         const ctx = canvas.getContext('2d');
+
 
         // 頂點定義 (A, B, C 可拖曳，D 自動計算維持平行四邊形，O 為兩對角線交點)
         let A = { x: 140, y: 80, name: 'A', draggable: true };
@@ -136,13 +178,16 @@
         let D = { x: 380, y: 80, name: 'D', draggable: false }; // D = C + A - B
         let O = { x: 0, y: 0, name: 'O', draggable: false };    // 交點
 
+
         let draggingPoint = null;
         let isAnimating = false;
         let animFrameId = null;
         let animAngle = 0;
 
+
         // 手機與行動端加大觸控半徑
         const handleRadius = window.innerWidth < 640 ? 16 : 14;
+
 
         // 自適應 Canvas 解析度調整
         function resizeCanvas() {
@@ -154,13 +199,16 @@
             canvas.height = rect.height * dpr;
             ctx.scale(dpr, dpr);
 
+
             draw();
         }
+
 
         // 計算兩點距離
         function getDistance(p1, p2) {
             return Math.hypot(p1.x - p2.x, p1.y - p2.y);
         }
+
 
         // 計算 AC 與 BD 的交點 O
         function calculateIntersection(p1, p2, p3, p4) {
@@ -173,16 +221,19 @@
             };
         }
 
+
         // 更新座標與數據
         function updateGeometry() {
             // D 點連動維持平行四邊形 (D = C + A - B)
             D.x = C.x + A.x - B.x;
             D.y = C.y + A.y - B.y;
 
+
             // 交點 O
             const inter = calculateIntersection(A, C, B, D);
             O.x = inter.x;
             O.y = inter.y;
+
 
             // 數據換算與顯示 (除以固定比例縮放，保留一位小數)
             const scale = 20; 
@@ -191,11 +242,13 @@
             const bo = (getDistance(B, O) / scale).toFixed(1);
             const od = (getDistance(O, D) / scale).toFixed(1);
 
+
             document.getElementById('valAO').innerText = ao;
             document.getElementById('valOC').innerText = oc;
             document.getElementById('valBO').innerText = bo;
             document.getElementById('valOD').innerText = od;
         }
+
 
         // Canvas 繪圖
         function draw() {
@@ -203,9 +256,12 @@
             const w = container.getBoundingClientRect().width;
             const h = container.getBoundingClientRect().height;
 
+
             ctx.clearRect(0, 0, w, h);
 
+
             updateGeometry();
+
 
             // 1. 平行四邊形填色
             ctx.beginPath();
@@ -217,10 +273,12 @@
             ctx.fillStyle = 'rgba(249, 115, 22, 0.08)';
             ctx.fill();
 
+
             // 2. 外框線
             ctx.lineWidth = 3;
             ctx.strokeStyle = '#f97316';
             ctx.stroke();
+
 
             // 3. 對角線 AC (紅色/粉色系)
             ctx.beginPath();
@@ -231,6 +289,7 @@
             ctx.setLineDash([6, 4]);
             ctx.stroke();
 
+
             // 4. 對角線 BD (藍色/靛色系)
             ctx.beginPath();
             ctx.moveTo(B.x, B.y);
@@ -240,7 +299,9 @@
             ctx.setLineDash([6, 4]);
             ctx.stroke();
 
+
             ctx.setLineDash([]); // 重設虛線
+
 
             // 5. 對角線交點 O
             ctx.beginPath();
@@ -251,9 +312,11 @@
             ctx.strokeStyle = '#ffffff';
             ctx.stroke();
 
+
             ctx.font = 'bold 15px "Noto Sans TC", sans-serif';
             ctx.fillStyle = '#047857';
             ctx.fillText('O (交點)', O.x + 10, O.y + 20);
+
 
             // 6. 頂點標籤與拖曳圓圈 (A, B, C, D)
             const points = [A, B, C, D];
@@ -274,12 +337,14 @@
                 ctx.fill();
                 ctx.stroke();
 
+
                 if (p.draggable) {
                     ctx.beginPath();
                     ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
                     ctx.fillStyle = '#ea580c';
                     ctx.fill();
                 }
+
 
                 ctx.font = 'bold 16px "Noto Sans TC", sans-serif';
                 ctx.fillStyle = '#1e293b';
@@ -288,6 +353,7 @@
                 ctx.fillText(p.name, p.x + offsetX, p.y + offsetY);
             });
         }
+
 
         // 觸控與滑鼠位置檢測
         function getCanvasPos(e) {
@@ -300,9 +366,11 @@
             };
         }
 
+
         function onPointerDown(e) {
             const pos = getCanvasPos(e);
             const draggables = [A, B, C];
+
 
             for (let p of draggables) {
                 if (getDistance(pos, p) <= handleRadius + 12) { // 防呆容錯區域
@@ -313,9 +381,11 @@
             }
         }
 
+
         function onPointerMove(e) {
             if (!draggingPoint) return;
             const pos = getCanvasPos(e);
+
 
             // 防呆機制：避免頂點拉出畫布邊界
             const container = canvas.parentElement;
@@ -323,24 +393,30 @@
             const h = container.getBoundingClientRect().height;
             const margin = 20;
 
+
             draggingPoint.x = Math.max(margin, Math.min(w - margin, pos.x));
             draggingPoint.y = Math.max(margin, Math.min(h - margin, pos.y));
+
 
             draw();
         }
 
+
         function onPointerUp() {
             draggingPoint = null;
         }
+
 
         // 綁定事件
         canvas.addEventListener('mousedown', onPointerDown);
         canvas.addEventListener('mousemove', onPointerMove);
         window.addEventListener('mouseup', onPointerUp);
 
+
         canvas.addEventListener('touchstart', (e) => { onPointerDown(e); e.preventDefault(); }, { passive: false });
         canvas.addEventListener('touchmove', (e) => { onPointerMove(e); e.preventDefault(); }, { passive: false });
         window.addEventListener('touchend', onPointerUp);
+
 
         // 重置圖形
         function resetGraph() {
@@ -349,12 +425,15 @@
             const w = container.getBoundingClientRect().width;
             const h = container.getBoundingClientRect().height;
 
+
             A.x = w * 0.32; A.y = h * 0.25;
             B.x = w * 0.20; B.y = h * 0.75;
             C.x = w * 0.68; C.y = h * 0.75;
 
+
             draw();
         }
+
 
         // 自動動畫展示
         function animateLoop() {
@@ -363,9 +442,11 @@
             A.y += Math.sin(animAngle * 0.5) * 0.5;
             C.x += Math.sin(animAngle) * 0.6;
 
+
             draw();
             animFrameId = requestAnimationFrame(animateLoop);
         }
+
 
         function toggleAnimation() {
             if (isAnimating) {
@@ -375,12 +456,14 @@
             }
         }
 
+
         function startAnimation() {
             isAnimating = true;
             document.getElementById('animText').innerText = '停止展示';
             document.getElementById('animIcon').className = 'fa-solid fa-pause';
             animateLoop();
         }
+
 
         function stopAnimation() {
             isAnimating = false;
@@ -389,12 +472,92 @@
             if (animFrameId) cancelAnimationFrame(animFrameId);
         }
 
+
+
+        // 闖關題目：答對才可進入下一關
+        const quizQuestions = [
+            { q: '第 1 關：O 點是由什麼決定的位置？', options: [['A','兩條對角線的交點'],['B','平行四邊形的一個頂點'],['C','任意選取的點'],['D','平行四邊形其中一邊的中點']], answer: 'A', hint: '觀察紅色 AC 和藍色 BD 相交的位置。', correct: 'O 是 AC 與 BD 的交點。拖曳頂點後，觀察這個交點如何跟著改變。' },
+            { q: '第 2 關：觀察數據中的 AO 和 OC，它們有什麼關係？', options: [['A','AO 比 OC 長'],['B','AO 比 OC 短'],['C','AO 和 OC 相等'],['D','兩段長度沒有固定關係']], answer: 'C', hint: '拖曳不同的頂點，觀察紅色對角線上 O 左右兩段的即時數值。', correct: 'AO = OC，所以 O 把對角線 AC 分成兩段等長的線段。' },
+            { q: '第 3 關：觀察數據中的 BO 和 OD，它們有什麼關係？', options: [['A','BO 和 OD 相等'],['B','BO 一定比 OD 長'],['C','OD 一定比 BO 長'],['D','只有圖形不能拖曳時才相等']], answer: 'A', hint: '改變圖形形狀後，再比較藍色對角線上 O 兩側的數值。', correct: 'BO = OD，所以 O 也把對角線 BD 分成兩段等長的線段。' },
+            { q: '第 4 關：因為 AO = OC 且 BO = OD，O 是什麼點？', options: [['A','只有 AC 的中點'],['B','只有 BD 的中點'],['C','AC 與 BD 的中點'],['D','平行四邊形的頂點']], answer: 'C', hint: '一條線段的中點會把線段分成怎樣的兩段？請把這個概念同時用在 AC 和 BD。', correct: 'O 同時是 AC 和 BD 的中點。因此，平行四邊形的兩條對角線互相平分。' }
+        ];
+        let quizIndex = 0;
+        let quizPassed = false;
+        const quizQuestionEl = document.getElementById('quizQuestion');
+        const quizOptionsEl = document.getElementById('quizOptions');
+        const quizFeedbackEl = document.getElementById('quizFeedback');
+        const nextQuizBtn = document.getElementById('nextQuizBtn');
+        const quizProgressEl = document.getElementById('quizProgress');
+        const quizBar = document.getElementById('quizBar');
+        const quizSummary = document.getElementById('quizSummary');
+        function renderQuiz() {
+            const item = quizQuestions[quizIndex];
+            quizPassed = false;
+            quizQuestionEl.textContent = item.q;
+            quizProgressEl.textContent = `第 ${quizIndex + 1} / ${quizQuestions.length} 關`;
+            quizBar.style.width = `${((quizIndex + 1) / quizQuestions.length) * 100}%`;
+            quizFeedbackEl.textContent = `提示：${item.hint}`;
+            quizFeedbackEl.className = 'text-sm mt-3 min-h-6 text-slate-500';
+            nextQuizBtn.disabled = true;
+            nextQuizBtn.className = 'rounded-xl px-4 py-2 font-bold text-sm bg-slate-200 text-slate-400 cursor-not-allowed';
+            nextQuizBtn.innerHTML = quizIndex === quizQuestions.length - 1 ? '完成探索 <i class="fa-solid fa-check ml-1"></i>' : '答對後前往下一關 <i class="fa-solid fa-arrow-right ml-1"></i>';
+            quizOptionsEl.innerHTML = '';
+            item.options.forEach(([value, label]) => {
+                const btn = document.createElement('button');
+                btn.type = 'button'; btn.dataset.value = value; btn.textContent = `${value}. ${label}`;
+                btn.className = 'quiz-option text-left rounded-xl border border-slate-200 bg-white hover:border-orange-300 hover:bg-orange-50 px-3 py-3 text-sm font-medium transition';
+                btn.addEventListener('click', () => checkQuizAnswer(value));
+                quizOptionsEl.appendChild(btn);
+            });
+            quizSummary.classList.add('hidden');
+        }
+        function checkQuizAnswer(value) {
+            if (quizPassed) return;
+            const item = quizQuestions[quizIndex];
+            if (value === item.answer) {
+                quizPassed = true;
+                quizFeedbackEl.textContent = `回答正確！${item.correct}`;
+                quizFeedbackEl.className = 'text-sm mt-3 min-h-6 text-emerald-700 font-semibold';
+                [...quizOptionsEl.children].forEach(btn => {
+                    btn.disabled = true;
+                    if (btn.dataset.value === item.answer) btn.className = 'quiz-option text-left rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-800 px-3 py-3 text-sm font-semibold';
+                    else btn.className = 'quiz-option text-left rounded-xl border border-slate-100 bg-slate-50 text-slate-400 px-3 py-3 text-sm';
+                });
+                nextQuizBtn.disabled = false;
+                nextQuizBtn.className = 'rounded-xl px-4 py-2 font-bold text-sm bg-orange-500 hover:bg-orange-600 text-white';
+                if (quizIndex === quizQuestions.length - 1) {
+                    quizSummary.classList.remove('hidden');
+                    quizFeedbackEl.textContent = '答對了！現在回到第一題，操作圖形並再次觀察 AO、OC、BO、OD 的變化。';
+                    quizFeedbackEl.className = 'text-sm mt-3 min-h-6 text-emerald-700 font-semibold';
+                    nextQuizBtn.innerHTML = '回到第一題，開始操作 <i class="fa-solid fa-rotate-left ml-1"></i>';
+                }
+            } else {
+                quizFeedbackEl.textContent = `再想一想喔！${item.hint}`;
+                quizFeedbackEl.className = 'text-sm mt-3 min-h-6 text-rose-600';
+            }
+        }
+        nextQuizBtn.addEventListener('click', () => {
+            if (!quizPassed) return;
+            if (quizIndex < quizQuestions.length - 1) {
+                quizIndex++;
+                renderQuiz();
+            } else {
+                // 第四關答對後，點擊按鈕回到第一題，讓學生重新操作圖形
+                quizIndex = 0;
+                renderQuiz();
+            }
+        });
+        document.getElementById('retryQuizBtn').addEventListener('click', renderQuiz);
+
         // 初始化
         document.getElementById('resetBtn').addEventListener('click', resetGraph);
         document.getElementById('animateBtn').addEventListener('click', toggleAnimation);
         window.addEventListener('resize', resizeCanvas);
 
+
         window.onload = function() {
+            // 先建立第一關選項，否則題目區會沒有可點選的按鈕
+            renderQuiz();
             resizeCanvas();
             resetGraph();
         };
